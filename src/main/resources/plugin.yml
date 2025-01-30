@@ -1,0 +1,6 @@
+name: Cachy
+version: '${project.version}'
+main: me.hsgamer.cachy.Cachy
+api-version: '1.13'
+softdepend: [ PlaceholderAPI ]
+authors: [ HSGamer ]
