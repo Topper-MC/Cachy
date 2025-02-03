@@ -2,14 +2,12 @@ package me.hsgamer.cachy.manager;
 
 import io.github.projectunified.minelib.plugin.base.Loadable;
 import me.hsgamer.cachy.Cachy;
-import me.hsgamer.cachy.config.DatabaseConfig;
 import me.hsgamer.cachy.config.MainConfig;
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
-import me.hsgamer.hscore.config.proxy.ConfigGenerator;
-import me.hsgamer.hscore.database.Setting;
 import me.hsgamer.topper.spigot.storage.simple.SpigotDataStorageBuilder;
 import me.hsgamer.topper.storage.core.DataStorage;
 import me.hsgamer.topper.storage.simple.builder.DataStorageBuilder;
+import me.hsgamer.topper.storage.simple.config.DatabaseConfig;
 import me.hsgamer.topper.storage.simple.converter.StringConverter;
 import me.hsgamer.topper.storage.simple.converter.UUIDConverter;
 import me.hsgamer.topper.storage.simple.setting.DataStorageSetting;
@@ -17,7 +15,6 @@ import me.hsgamer.topper.storage.simple.supplier.DataStorageSupplier;
 
 import java.io.File;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 public class DataStorageManager implements Loadable {
     private final Cachy plugin;
@@ -38,8 +35,8 @@ public class DataStorageManager implements Loadable {
 
         this.supplier = builder.buildSupplier(plugin.get(MainConfig.class).getStorageType(), new DataStorageSetting() {
             @Override
-            public Consumer<Setting> getDatabaseSettingModifier() {
-                return ConfigGenerator.newInstance(DatabaseConfig.class, new BukkitConfig(new File(plugin.getDataFolder(), "database.yml")));
+            public DatabaseConfig getDatabaseSetting() {
+                return new DatabaseConfig("cachy", new BukkitConfig(new File(plugin.getDataFolder(), "database.yml")));
             }
 
             @Override

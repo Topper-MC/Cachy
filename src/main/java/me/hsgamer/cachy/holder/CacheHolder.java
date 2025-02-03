@@ -15,7 +15,7 @@ public class CacheHolder extends AgentDataHolder<UUID, String> {
         super(name);
 
         DataStorage<UUID, String> storage = plugin.get(DataStorageManager.class).buildStorage(name, 65536);
-        StorageAgent<UUID, String> storageAgent = new StorageAgent<>(plugin.getLogger(), this, storage);
+        StorageAgent<UUID, String> storageAgent = new StorageAgent<>(this, storage);
         addAgent(storageAgent);
         addEntryAgent(storageAgent);
         addAgent(new SpigotRunnableAgent(storageAgent, AsyncScheduler.get(plugin), 20));
