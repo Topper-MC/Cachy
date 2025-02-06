@@ -1,5 +1,6 @@
 package me.hsgamer.cachy.manager;
 
+import com.google.common.collect.ImmutableList;
 import io.github.projectunified.minelib.plugin.base.Loadable;
 import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
 import io.github.projectunified.minelib.scheduler.common.task.Task;
@@ -36,7 +37,7 @@ public class CacheHolderManager implements Loadable {
             holders.put(name, holder);
         });
         this.updateTask = AsyncScheduler.get(plugin).runTimer(() -> {
-            for (Player player : Bukkit.getOnlinePlayers()) {
+            for (Player player : ImmutableList.copyOf(Bukkit.getOnlinePlayers())) {
                 holders.values().forEach(holder -> holder.getUpdateAgent().update(player));
             }
         }, 0, 0);
