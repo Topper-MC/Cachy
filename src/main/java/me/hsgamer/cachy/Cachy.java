@@ -4,6 +4,7 @@ import io.github.projectunified.minelib.plugin.base.BasePlugin;
 import me.hsgamer.cachy.builder.ValueProviderBuilder;
 import me.hsgamer.cachy.config.MainConfig;
 import me.hsgamer.cachy.manager.CacheHolderManager;
+import me.hsgamer.cachy.manager.CacheQueryManager;
 import me.hsgamer.cachy.manager.DataStorageManager;
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
 import me.hsgamer.hscore.config.proxy.ConfigGenerator;
@@ -20,7 +21,8 @@ public final class Cachy extends BasePlugin {
                 new ValueProviderBuilder(),
 
                 new DataStorageManager(this),
-                new CacheHolderManager(this)
+                new CacheHolderManager(this),
+                new CacheQueryManager(this)
         );
     }
 }

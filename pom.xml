@@ -136,6 +136,11 @@
             <artifactId>topper-agent-storage</artifactId>
             <version>${topper.version}</version>
         </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-query-simple</artifactId>
+            <version>${topper.version}</version>
+        </dependency>
         <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>me.hsgamer</groupId>
@@ -161,6 +166,13 @@
             <groupId>me.hsgamer</groupId>
             <artifactId>topper-spigot-value-placeholderapi</artifactId>
             <version>${topper.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>26.0.2</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
