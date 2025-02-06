@@ -110,6 +110,11 @@
             <artifactId>minelib-scheduler-async</artifactId>
             <version>${minelib.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>minelib-scheduler-entity</artifactId>
+            <version>${minelib.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>me.hsgamer</groupId>

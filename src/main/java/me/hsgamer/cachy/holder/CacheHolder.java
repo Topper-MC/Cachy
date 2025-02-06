@@ -1,6 +1,7 @@
 package me.hsgamer.cachy.holder;
 
 import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
+import io.github.projectunified.minelib.scheduler.entity.EntityScheduler;
 import me.hsgamer.cachy.Cachy;
 import me.hsgamer.cachy.builder.ValueProviderBuilder;
 import me.hsgamer.cachy.manager.DataStorageManager;
@@ -17,7 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.logging.Level;
 
 public class CacheHolder extends AgentDataHolder<UUID, String> {
     public CacheHolder(Cachy plugin, String name, Map<String, Object> map) {
@@ -35,11 +36,25 @@ public class CacheHolder extends AgentDataHolder<UUID, String> {
                 plugin.getLogger().warning("No value provider found for " + type + " in " + name);
                 return ValueProvider.empty();
             });
-            Function<UUID, CompletableFuture<Optional<String>>> updateFunction = uuid -> {
+            boolean isAsync = Optional.ofNullable(map.get("async"))
+                    .map(String::valueOf)
+                    .map(Boolean::parseBoolean)
+                    .orElse(false);
+            boolean showErrors = Optional.ofNullable(map.get("show-errors"))
+                    .map(String::valueOf)
+                    .map(Boolean::parseBoolean)
+                    .orElse(false);
+            UpdateAgent<UUID, String> updateAgent = new UpdateAgent<>(this, uuid -> {
                 Player player = plugin.getServer().getPlayer(uuid);
-                return player == null ? CompletableFuture.completedFuture(Optional.empty()) : CompletableFuture.completedFuture(valueProvider.apply(player).asOptional());
-            };
-            UpdateAgent<UUID, String> updateAgent = new UpdateAgent<>(this, updateFunction);
+                if (player == null) {
+                    return CompletableFuture.completedFuture(Optional.empty());
+                }
+                return CompletableFuture.supplyAsync(() -> valueProvider.apply(player).asOptional((message, throwable) -> {
+                    if (showErrors) {
+                        plugin.getLogger().log(Level.WARNING, "An error occurred while getting the value for " + player.getName() + " in " + name + " - " + message, throwable);
+                    }
+                }), (isAsync ? AsyncScheduler.get(plugin) : EntityScheduler.get(plugin, player)).getExecutor());
+            });
             addAgent(new SpigotRunnableAgent(updateAgent, AsyncScheduler.get(plugin), 20));
         }
     }
