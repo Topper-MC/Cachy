@@ -4,12 +4,14 @@ import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
 import me.hsgamer.cachy.Cachy;
 import me.hsgamer.cachy.holder.agent.UpdateAgent;
 import me.hsgamer.cachy.manager.DataStorageManager;
+import me.hsgamer.hscore.common.Validate;
 import me.hsgamer.topper.agent.holder.AgentDataHolder;
 import me.hsgamer.topper.agent.storage.StorageAgent;
 import me.hsgamer.topper.spigot.agent.runnable.SpigotRunnableAgent;
 import me.hsgamer.topper.storage.core.DataStorage;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class CacheHolder extends AgentDataHolder<UUID, String> {
@@ -18,7 +20,12 @@ public class CacheHolder extends AgentDataHolder<UUID, String> {
     public CacheHolder(Cachy plugin, String name, Map<String, Object> map) {
         super(name);
 
-        DataStorage<UUID, String> storage = plugin.get(DataStorageManager.class).buildStorage(name, 65536);
+        int valueSize = Optional.ofNullable(map.get("value-size"))
+                .map(String::valueOf)
+                .flatMap(Validate::getNumber)
+                .map(Number::intValue)
+                .orElse(65536);
+        DataStorage<UUID, String> storage = plugin.get(DataStorageManager.class).buildStorage(name, valueSize);
         StorageAgent<UUID, String> storageAgent = new StorageAgent<>(this, storage);
         addAgent(storageAgent);
         addEntryAgent(storageAgent);
