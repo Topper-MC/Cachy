@@ -4,6 +4,7 @@ import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.config.annotation.converter.Converter;
 
 import java.util.AbstractMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StringObjectValueMapConverter implements Converter {
@@ -17,6 +18,7 @@ public class StringObjectValueMapConverter implements Converter {
                                 .map(Stream::of)
                                 .orElseGet(Stream::empty)
                         )
+                        .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue, (a, b) -> b))
                 ).orElse(null);
     }
 
