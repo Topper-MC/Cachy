@@ -2,6 +2,7 @@ package me.hsgamer.cachy.holder;
 
 import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
 import me.hsgamer.cachy.Cachy;
+import me.hsgamer.cachy.holder.agent.SyncAgent;
 import me.hsgamer.cachy.holder.agent.UpdateAgent;
 import me.hsgamer.cachy.manager.DataStorageManager;
 import me.hsgamer.hscore.common.Validate;
@@ -33,6 +34,16 @@ public class CacheHolder extends AgentDataHolder<UUID, String> {
 
         this.updateAgent = new UpdateAgent(plugin, this, map);
         addAgent(updateAgent);
+
+        boolean storageSync = Optional.ofNullable(map.get("storage-sync"))
+                .map(String::valueOf)
+                .map(Boolean::parseBoolean)
+                .orElse(false);
+        if (storageSync) {
+            SyncAgent syncAgent = new SyncAgent(this, storage);
+            addAgent(syncAgent);
+            addAgent(new SpigotRunnableAgent(syncAgent, AsyncScheduler.get(plugin), 20));
+        }
     }
 
     @Override
