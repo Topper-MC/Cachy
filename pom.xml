@@ -14,7 +14,7 @@
     <properties>
         <core.version>4.5.7</core.version>
         <minelib.version>1.2.5</minelib.version>
-        <topper.version>3.6.0</topper.version>
+        <topper.version>3.7.1</topper.version>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -77,6 +77,10 @@
         <repository>
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/releases/</url>
         </repository>
     </repositories>
 
@@ -146,10 +150,14 @@
             <artifactId>topper-spigot-storage-simple</artifactId>
             <version>${topper.version}</version>
         </dependency>
-        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>me.hsgamer</groupId>
-            <artifactId>topper-storage-simple-config</artifactId>
+            <artifactId>topper-storage-simple-converter</artifactId>
+            <version>${topper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>topper-storage-simple-sql-config</artifactId>
             <version>${topper.version}</version>
         </dependency>
         <dependency>
@@ -166,6 +174,13 @@
             <groupId>me.hsgamer</groupId>
             <artifactId>topper-spigot-value-placeholderapi</artifactId>
             <version>${topper.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.6</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
