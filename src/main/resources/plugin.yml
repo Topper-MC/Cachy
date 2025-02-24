@@ -4,3 +4,4 @@ main: me.hsgamer.cachy.Cachy
 api-version: '1.13'
 softdepend: [ PlaceholderAPI ]
 authors: [ HSGamer ]
+folia-supported: true
