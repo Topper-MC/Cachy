@@ -11,6 +11,7 @@ import me.hsgamer.topper.agent.storage.StorageAgent;
 import me.hsgamer.topper.spigot.agent.runnable.SpigotRunnableAgent;
 import me.hsgamer.topper.storage.core.DataStorage;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,12 +22,12 @@ public class CacheHolder extends AgentDataHolder<UUID, String> {
     public CacheHolder(Cachy plugin, String name, Map<String, Object> map) {
         super(name);
 
-        int valueSize = Optional.ofNullable(map.get("value-size"))
+        int size = Optional.ofNullable(map.get("size"))
                 .map(String::valueOf)
                 .flatMap(Validate::getNumber)
                 .map(Number::intValue)
                 .orElse(65536);
-        DataStorage<UUID, String> storage = plugin.get(DataStorageManager.class).buildStorage(name, valueSize);
+        DataStorage<UUID, String> storage = plugin.get(DataStorageManager.class).buildStorage(name, size);
         StorageAgent<UUID, String> storageAgent = new StorageAgent<>(this, storage);
         addAgent(storageAgent);
         addEntryAgent(storageAgent);
@@ -35,14 +36,14 @@ public class CacheHolder extends AgentDataHolder<UUID, String> {
         this.updateAgent = new UpdateAgent(plugin, this, map);
         addAgent(updateAgent);
 
-        boolean storageSync = Optional.ofNullable(map.get("storage-sync"))
+        Optional<Long> syncPeriod = Optional.ofNullable(map.get("sync"))
                 .map(String::valueOf)
-                .map(Boolean::parseBoolean)
-                .orElse(false);
-        if (storageSync) {
+                .flatMap(Validate::getNumber)
+                .map(BigDecimal::longValue);
+        if (syncPeriod.isPresent()) {
             SyncAgent syncAgent = new SyncAgent(this, storage);
             addAgent(syncAgent);
-            addAgent(new SpigotRunnableAgent(syncAgent, AsyncScheduler.get(plugin), 20));
+            addAgent(new SpigotRunnableAgent(syncAgent, AsyncScheduler.get(plugin), syncPeriod.get()));
         }
     }
 
