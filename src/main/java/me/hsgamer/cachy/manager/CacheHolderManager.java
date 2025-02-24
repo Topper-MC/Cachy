@@ -36,11 +36,12 @@ public class CacheHolderManager implements Loadable {
             holder.register();
             holders.put(name, holder);
         });
+        long updatePeriod = plugin.get(MainConfig.class).getTaskUpdatePeriod();
         this.updateTask = AsyncScheduler.get(plugin).runTimer(() -> {
             for (Player player : ImmutableList.copyOf(Bukkit.getOnlinePlayers())) {
                 holders.values().forEach(holder -> holder.getUpdateAgent().update(player));
             }
-        }, 0, 0);
+        }, updatePeriod, updatePeriod);
     }
 
     @Override

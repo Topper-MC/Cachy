@@ -16,4 +16,9 @@ public interface MainConfig {
     default String getStorageType() {
         return "flat";
     }
+
+    @ConfigPath({"task", "update", "period"})
+    default long getTaskUpdatePeriod() {
+        return 10;
+    }
 }
