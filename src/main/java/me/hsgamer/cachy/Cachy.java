@@ -5,6 +5,7 @@ import me.hsgamer.cachy.builder.ValueProviderBuilder;
 import me.hsgamer.cachy.config.MainConfig;
 import me.hsgamer.cachy.hook.HookSystem;
 import me.hsgamer.cachy.manager.CacheHolderManager;
+import me.hsgamer.cachy.manager.CacheQueryForward;
 import me.hsgamer.cachy.manager.CacheQueryManager;
 import me.hsgamer.cachy.manager.DataStorageManager;
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
@@ -25,7 +26,8 @@ public final class Cachy extends BasePlugin {
 
                 new DataStorageManager(this),
                 new CacheHolderManager(this),
-                new CacheQueryManager(this)
+                new CacheQueryManager(this),
+                new CacheQueryForward(this)
         );
     }
 }

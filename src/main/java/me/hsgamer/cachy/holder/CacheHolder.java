@@ -48,7 +48,7 @@ public class CacheHolder extends AgentDataHolder<UUID, String> {
     }
 
     @Override
-    protected String getDefaultValue() {
+    public String getDefaultValue() {
         return "";
     }
 

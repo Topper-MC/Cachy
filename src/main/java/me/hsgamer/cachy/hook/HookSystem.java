@@ -1,15 +1,12 @@
 package me.hsgamer.cachy.hook;
 
 import io.github.projectunified.minelib.plugin.base.Loadable;
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.hsgamer.cachy.Cachy;
 import me.hsgamer.cachy.builder.ValueProviderBuilder;
-import me.hsgamer.cachy.manager.CacheQueryManager;
+import me.hsgamer.cachy.manager.CacheQueryForward;
+import me.hsgamer.topper.spigot.query.forward.placeholderapi.PlaceholderQueryForwarder;
 import me.hsgamer.topper.spigot.value.placeholderapi.PlaceholderValueProvider;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,34 +30,9 @@ public class HookSystem implements Loadable {
                         .<Player>keyMapper(player -> player)
                         .thenApply(output -> Objects.equals(placeholder, output) ? null : output);
             }, "placeholder", "placeholderapi", "papi");
-            PlaceholderExpansion expansion = new PlaceholderExpansion() {
-                @Override
-                public @NotNull String getIdentifier() {
-                    return "cachy";
-                }
-
-                @Override
-                public @NotNull String getAuthor() {
-                    return String.join(", ", plugin.getDescription().getAuthors());
-                }
-
-                @Override
-                public @NotNull String getVersion() {
-                    return plugin.getDescription().getVersion();
-                }
-
-                @Override
-                public boolean persist() {
-                    return true;
-                }
-
-                @Override
-                public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
-                    return plugin.get(CacheQueryManager.class).get(player, params);
-                }
-            };
-            expansion.register();
-            disableTasks.add(expansion::unregister);
+            PlaceholderQueryForwarder<CacheQueryForward.Context> forwarder = new PlaceholderQueryForwarder<>();
+            plugin.get(CacheQueryForward.class).addForwarder(forwarder);
+            disableTasks.add(forwarder::unregister);
         }
     }
 
