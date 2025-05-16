@@ -1,5 +1,6 @@
 package me.hsgamer.cachy.builder;
 
+import me.hsgamer.cachy.holder.provider.PlayerValueProvider;
 import me.hsgamer.hscore.builder.FunctionalMassBuilder;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.topper.spigot.value.statistic.StatisticValueProvider;
@@ -16,6 +17,7 @@ public class ValueProviderBuilder extends FunctionalMassBuilder<ValueProviderBui
             List<String> entityTypes = Optional.ofNullable(input.data.get("entity-type")).map(CollectionUtils::createStringListFromObject).orElse(Collections.emptyList());
             return StatisticValueProvider.fromRaw(statistic, materials, entityTypes).thenApply(Object::toString);
         }, "statistic");
+        register(input -> PlayerValueProvider.of(input.data), "player");
     }
 
     @Override
