@@ -2,10 +2,10 @@ package me.hsgamer.cachy.manager;
 
 import io.github.projectunified.minelib.plugin.base.Loadable;
 import me.hsgamer.cachy.Cachy;
-import me.hsgamer.spigot.query.forward.plugin.PluginContext;
 import me.hsgamer.topper.query.core.QueryResult;
 import me.hsgamer.topper.query.forward.QueryForward;
 import me.hsgamer.topper.query.forward.QueryForwardContext;
+import me.hsgamer.topper.spigot.query.forward.plugin.PluginContext;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
