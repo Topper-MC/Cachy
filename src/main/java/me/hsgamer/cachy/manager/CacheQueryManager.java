@@ -10,11 +10,15 @@ import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
 public class CacheQueryManager extends QueryManager<OfflinePlayer> {
+    private final List<BiFunction<OfflinePlayer, String, String>> parseFunction = new ArrayList<>();
+
     public CacheQueryManager(Cachy plugin) {
         addQuery(new SimpleQuery<OfflinePlayer, SimpleQueryContext>() {
             {
@@ -32,7 +36,7 @@ public class CacheQueryManager extends QueryManager<OfflinePlayer> {
                         queryPlayer = player;
                     } else {
                         //noinspection deprecation
-                        queryPlayer = plugin.getServer().getOfflinePlayer(context.args);
+                        queryPlayer = plugin.getServer().getOfflinePlayer(parse(player, context.args));
                     }
                     if (queryPlayer == null) return null;
                     return queryFunction.apply(queryPlayer, context.name);
@@ -43,7 +47,7 @@ public class CacheQueryManager extends QueryManager<OfflinePlayer> {
                         queryPlayer = player;
                     } else {
                         try {
-                            queryPlayer = plugin.getServer().getOfflinePlayer(UUID.fromString(context.args));
+                            queryPlayer = plugin.getServer().getOfflinePlayer(UUID.fromString(parse(player, context.args)));
                         } catch (Exception e) {
                             return null;
                         }
@@ -58,5 +62,20 @@ public class CacheQueryManager extends QueryManager<OfflinePlayer> {
                 return SimpleQueryContext.fromQuery(query, false);
             }
         });
+    }
+
+    public Runnable addParseFunction(BiFunction<OfflinePlayer, String, String> function) {
+        parseFunction.add(function);
+        return () -> parseFunction.remove(function);
+    }
+
+    private String parse(OfflinePlayer player, String query) {
+        for (BiFunction<OfflinePlayer, String, String> function : parseFunction) {
+            String result = function.apply(player, query);
+            if (result != null) {
+                query = result;
+            }
+        }
+        return query;
     }
 }
