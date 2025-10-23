@@ -14,7 +14,7 @@ public interface MainConfig {
 
     @ConfigPath("storage-type")
     default String getStorageType() {
-        return "flat";
+        return "sqlite";
     }
 
     @ConfigPath({"task", "update", "period"})

@@ -29,11 +29,11 @@ public class HookSystem implements Loadable {
             plugin.get(ValueProviderBuilder.class).register(input -> {
                 String placeholder = Optional.ofNullable(input.data.get("placeholder")).map(Object::toString).orElse("");
                 return new PlaceholderValueProvider(placeholder, true)
-                        .<Player>keyMapper(player -> player)
+                        .<Player>beforeApply(player -> player)
                         .thenApply(output -> Objects.equals(placeholder, output) ? null : output);
             }, "placeholder", "placeholderapi", "papi");
 
-            PlaceholderQueryForwarder<CacheQueryForward.Context> forwarder = new PlaceholderQueryForwarder<>();
+            PlaceholderQueryForwarder<CacheQueryForward.Context> forwarder = new PlaceholderQueryForwarder<>(plugin);
             plugin.get(CacheQueryForward.class).addForwarder(forwarder);
             disableTasks.add(forwarder::unregister);
 

@@ -4,53 +4,54 @@ import io.github.projectunified.minelib.plugin.base.Loadable;
 import me.hsgamer.cachy.Cachy;
 import me.hsgamer.cachy.config.MainConfig;
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
-import me.hsgamer.topper.spigot.storage.simple.SpigotDataStorageBuilder;
+import me.hsgamer.hscore.database.client.sql.java.JavaSqlClient;
 import me.hsgamer.topper.storage.core.DataStorage;
-import me.hsgamer.topper.storage.simple.builder.DataStorageBuilder;
-import me.hsgamer.topper.storage.simple.config.DatabaseConfig;
-import me.hsgamer.topper.storage.simple.converter.StringConverter;
-import me.hsgamer.topper.storage.simple.converter.UUIDConverter;
-import me.hsgamer.topper.storage.simple.setting.DataStorageSetting;
-import me.hsgamer.topper.storage.simple.supplier.DataStorageSupplier;
+import me.hsgamer.topper.storage.sql.config.SqlDatabaseConfig;
+import me.hsgamer.topper.storage.sql.converter.StringSqlValueConverter;
+import me.hsgamer.topper.storage.sql.converter.UUIDSqlValueConverter;
+import me.hsgamer.topper.storage.sql.core.SqlDatabaseSetting;
+import me.hsgamer.topper.storage.sql.core.SqlValueConverter;
+import me.hsgamer.topper.storage.sql.mysql.MySqlDataStorageSupplier;
+import me.hsgamer.topper.storage.sql.sqlite.NewSqliteDataStorageSupplier;
+import me.hsgamer.topper.storage.sql.sqlite.SqliteDataStorageSupplier;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class DataStorageManager implements Loadable {
     private final Cachy plugin;
-    private DataStorageSupplier supplier;
 
     public DataStorageManager(Cachy plugin) {
         this.plugin = plugin;
     }
 
-    public DataStorage<UUID, String> buildStorage(String name, int valueSize) {
-        return this.supplier.getStorage(name, new UUIDConverter("uuid"), new StringConverter("value", true, valueSize));
-    }
-
-    @Override
-    public void enable() {
-        DataStorageBuilder builder = new DataStorageBuilder();
-        SpigotDataStorageBuilder.register(builder);
-
-        this.supplier = builder.buildSupplier(plugin.get(MainConfig.class).getStorageType(), new DataStorageSetting() {
-            @Override
-            public DatabaseConfig getDatabaseSetting() {
-                return new DatabaseConfig("cachy", new BukkitConfig(new File(plugin.getDataFolder(), "database.yml")));
+    public DataStorage<UUID, String> buildStorage(String name) {
+        String type = plugin.get(MainConfig.class).getStorageType();
+        Supplier<File> baseFolder = () -> {
+            File file = new File(plugin.getDataFolder(), "data");
+            if (!file.exists()) {
+                file.mkdirs();
             }
-
-            @Override
-            public File getBaseFolder() {
-                return new File(plugin.getDataFolder(), "data");
+            return file;
+        };
+        Supplier<SqlDatabaseSetting> sqlDatabaseSetting = () -> new SqlDatabaseConfig("cachy", new BukkitConfig(new File(plugin.getDataFolder(), "database.yml")));
+        SqlValueConverter<UUID> sqlKeyConverter = new UUIDSqlValueConverter("uuid");
+        SqlValueConverter<String> sqlValueConverter = new StringSqlValueConverter("value", "TEXT");
+        switch (type.toLowerCase(Locale.ROOT)) {
+            case "mysql": {
+                MySqlDataStorageSupplier supplier = new MySqlDataStorageSupplier(sqlDatabaseSetting.get(), JavaSqlClient::new);
+                return supplier.getStorage(name, sqlKeyConverter, sqlValueConverter);
             }
-        });
-        this.supplier.enable();
-    }
-
-    @Override
-    public void disable() {
-        if (this.supplier != null) {
-            this.supplier.disable();
+            case "new-sqlite": {
+                SqliteDataStorageSupplier supplier = new NewSqliteDataStorageSupplier(baseFolder.get(), sqlDatabaseSetting.get(), JavaSqlClient::new);
+                return supplier.getStorage(name, sqlKeyConverter, sqlValueConverter);
+            }
+            default: {
+                SqliteDataStorageSupplier supplier = new SqliteDataStorageSupplier(baseFolder.get(), sqlDatabaseSetting.get(), JavaSqlClient::new);
+                return supplier.getStorage(name, sqlKeyConverter, sqlValueConverter);
+            }
         }
     }
 }
