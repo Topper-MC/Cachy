@@ -4,7 +4,6 @@ import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
 import io.github.projectunified.minelib.scheduler.global.GlobalScheduler;
 import me.hsgamer.cachy.Cachy;
 import me.hsgamer.cachy.builder.ValueProviderBuilder;
-import me.hsgamer.cachy.holder.agent.SyncAgent;
 import me.hsgamer.cachy.manager.DataStorageManager;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.common.Validate;
@@ -73,16 +72,19 @@ public class CacheHolder extends SimpleDataHolder<UUID, String> implements Agent
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
                 .orElse(false);
-        String type = Objects.toString(map.get("type"), "readonly");
+        Optional<Long> syncPeriod = Optional.ofNullable(map.get("sync"))
+                .map(String::valueOf)
+                .flatMap(Validate::getNumber)
+                .map(BigDecimal::longValue);
+        String type = Objects.toString(map.get("type"), "");
 
         DataStorage<UUID, String> storage = plugin.get(DataStorageManager.class).buildStorage(name);
         StorageAgent<UUID, String> storageAgent = new StorageAgent<>(storage);
-        storageAgent.setMaxEntryPerCall(saveAmount);
-        agents.add(storageAgent);
-        entryAgents.add(storageAgent);
-        agents.add(new SpigotRunnableAgent(storageAgent, AsyncScheduler.get(plugin), savePeriod));
-        agents.add(storageAgent.getLoadAgent(this));
-        if (!type.equalsIgnoreCase("readonly")) {
+        Agent loadAgent = storageAgent.getLoadAgent(this);
+
+        if (syncPeriod.isPresent()) {
+            agents.add(new SpigotRunnableAgent(loadAgent::start, AsyncScheduler.get(plugin), syncPeriod.get()));
+        } else {
             ValueProvider<UUID, String> valueProvider = plugin.get(ValueProviderBuilder.class).build(new ValueProviderBuilder.Input(type, map)).orElseGet(() -> {
                 plugin.getLogger().warning("No value provider found for " + type + " in " + name);
                 return ValueProvider.empty();
@@ -100,16 +102,12 @@ public class CacheHolder extends SimpleDataHolder<UUID, String> implements Agent
             entryAgents.add(updateAgent);
             agents.add(new SpigotRunnableAgent(updateAgent.getUpdateRunnable(updateAmount), isAsync ? AsyncScheduler.get(plugin) : GlobalScheduler.get(plugin), updatePeriod));
             agents.add(new SpigotRunnableAgent(updateAgent.getSetRunnable(), AsyncScheduler.get(plugin), setPeriod));
-        }
 
-        Optional<Long> syncPeriod = Optional.ofNullable(map.get("sync"))
-                .map(String::valueOf)
-                .flatMap(Validate::getNumber)
-                .map(BigDecimal::longValue);
-        if (syncPeriod.isPresent()) {
-            SyncAgent syncAgent = new SyncAgent(this, storage);
-            agents.add(syncAgent);
-            agents.add(new SpigotRunnableAgent(syncAgent, AsyncScheduler.get(plugin), syncPeriod.get()));
+            storageAgent.setMaxEntryPerCall(saveAmount);
+            agents.add(storageAgent);
+            entryAgents.add(storageAgent);
+            agents.add(new SpigotRunnableAgent(storageAgent, AsyncScheduler.get(plugin), savePeriod));
+            agents.add(loadAgent);
         }
     }
 
