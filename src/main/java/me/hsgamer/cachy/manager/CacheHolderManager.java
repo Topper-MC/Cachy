@@ -1,21 +1,15 @@
 package me.hsgamer.cachy.manager;
 
-import com.google.common.collect.ImmutableList;
 import io.github.projectunified.minelib.plugin.base.Loadable;
-import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
-import io.github.projectunified.minelib.scheduler.common.task.Task;
 import me.hsgamer.cachy.Cachy;
 import me.hsgamer.cachy.config.MainConfig;
 import me.hsgamer.cachy.holder.CacheHolder;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 import java.util.*;
 
 public class CacheHolderManager implements Loadable {
     private final Cachy plugin;
     private final Map<String, CacheHolder> holders = new HashMap<>();
-    private Task updateTask;
 
     public CacheHolderManager(Cachy plugin) {
         this.plugin = plugin;
@@ -36,19 +30,10 @@ public class CacheHolderManager implements Loadable {
             holder.register();
             holders.put(name, holder);
         });
-        long updatePeriod = plugin.get(MainConfig.class).getTaskUpdatePeriod();
-        this.updateTask = AsyncScheduler.get(plugin).runTimer(() -> {
-            for (Player player : ImmutableList.copyOf(Bukkit.getOnlinePlayers())) {
-                holders.values().forEach(holder -> holder.getUpdateAgent().update(player));
-            }
-        }, updatePeriod, updatePeriod);
     }
 
     @Override
     public void disable() {
-        if (updateTask != null) {
-            updateTask.cancel();
-        }
         holders.values().forEach(CacheHolder::unregister);
         holders.clear();
     }

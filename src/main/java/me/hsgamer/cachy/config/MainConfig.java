@@ -16,9 +16,4 @@ public interface MainConfig {
     default String getStorageType() {
         return "sqlite";
     }
-
-    @ConfigPath({"task", "update", "period"})
-    default long getTaskUpdatePeriod() {
-        return 10;
-    }
 }
