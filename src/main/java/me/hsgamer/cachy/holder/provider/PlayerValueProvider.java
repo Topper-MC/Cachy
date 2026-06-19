@@ -3,10 +3,10 @@ package me.hsgamer.cachy.holder.provider;
 import me.hsgamer.topper.value.core.ValueProvider;
 import me.hsgamer.topper.value.core.ValueWrapper;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class PlayerValueProvider implements ValueProvider<Player, String> {
     private final DataType dataType;
@@ -31,18 +31,23 @@ public class PlayerValueProvider implements ValueProvider<Player, String> {
     }
 
     @Override
-    public @NotNull ValueWrapper<String> apply(@NotNull Player player) {
+    public void accept(Player player, Consumer<ValueWrapper<String>> callback) {
         switch (dataType) {
             case NAME:
-                return ValueWrapper.handled(player.getName());
+                callback.accept(ValueWrapper.handled(player.getName()));
+                break;
             case DISPLAY_NAME:
-                return ValueWrapper.handled(player.getDisplayName());
+                callback.accept(ValueWrapper.handled(player.getDisplayName()));
+                break;
             case XP:
-                return ValueWrapper.handled(String.valueOf(player.getTotalExperience()));
+                callback.accept(ValueWrapper.handled(String.valueOf(player.getTotalExperience())));
+                break;
             case LEVEL:
-                return ValueWrapper.handled(String.valueOf(player.getLevel()));
+                callback.accept(ValueWrapper.handled(String.valueOf(player.getLevel())));
+                break;
             default:
-                return ValueWrapper.notHandled();
+                callback.accept(ValueWrapper.notHandled());
+                break;
         }
     }
 
